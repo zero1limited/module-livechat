@@ -1,0 +1,19 @@
+<script>
+(function () {
+    function initLc() {
+        window.__lc = window.__lc || {};
+        window.__lc.license = <?= $block->getLicenseCode() ?>;
+
+        const script = document.createElement('script')
+        script.src = '<?= $block->getLivechatJsUrl() ?>';
+        script.id = 'livechat-snippet';
+
+        document.head.append(script);
+    }
+
+    // trigger load on mobile by any interaction
+    document.body.addEventListener('touchstart', initLc, {once: true});
+    // trigger load on desktop on any mouse movement
+    document.body.addEventListener('mouseover', initLc, {once: true});
+})();
+</script>

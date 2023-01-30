@@ -1,0 +1,29 @@
+{
+    "name": "zero1/module-livechat",
+    "description": "Easy integration of LiveChat",
+    "require": {
+        "magento/framework": "*"
+    },
+    "type": "magento2-module",
+    "version": "0.0.1",
+    "license": [
+        "proprietary"
+    ],
+    "keywords": [
+        "Magento Open Source",
+        "LiveChat",
+        "ZERO-1"
+    ],
+    "homepage": "https://www.zero1.co.uk",
+    "support": {
+        "email": "support@zero1.co.uk"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Zero1\\Livechat\\": ""
+        }
+    }
+}
