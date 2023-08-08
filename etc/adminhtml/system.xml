@@ -1,20 +1,20 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
     <system>
-        <section id="zero1_livechat" translate="label" type="text" sortOrder="550" showInDefault="1" showInWebsite="0" showInStore="0">
+        <section id="zero1_livechat" translate="label" type="text" sortOrder="550" showInDefault="1" showInWebsite="1" showInStore="0">
             <label>ZERO-1 | LiveChat</label>
             <tab>customer</tab>
             <resource>Zero1_Livechat::config</resource>
-            <group id="description" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+            <group id="description" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
                 <frontend_model>Zero1\Livechat\Block\Adminhtml\Config\Description</frontend_model>
             </group>
-            <group id="configuration" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+            <group id="configuration" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>Conifguration</label>
-                <field id="enable" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="enable" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Enable LiveChat integration</label>
                     <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
                 </field>
-                <field id="license_code" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="license_code" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>LiveChat license code</label>
                 </field>
             </group>

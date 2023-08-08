@@ -4,6 +4,7 @@ namespace Zero1\Livechat\Block;
 
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Store\Model\ScopeInterface;
 use Magento\Framework\View\Asset\Repository as AssetRepository;
 
 class Loader extends Template
@@ -53,7 +54,7 @@ class Loader extends Template
      */
     public function getIsEnabled()
     {
-        return $this->scopeConfig->getValue('zero1_livechat/configuration/enable');
+        return $this->scopeConfig->getValue('zero1_livechat/configuration/enable', ScopeInterface::SCOPE_WEBSITE, $this->_storeManager->getStore()->getWebsiteId());
     }
 
     /**
@@ -61,7 +62,7 @@ class Loader extends Template
      */
     public function getLicenseCode()
     {
-        return $this->scopeConfig->getValue('zero1_livechat/configuration/license_code');
+        return $this->scopeConfig->getValue('zero1_livechat/configuration/license_code', ScopeInterface::SCOPE_WEBSITE, $this->_storeManager->getStore()->getWebsiteId());
     }
 
     /**
