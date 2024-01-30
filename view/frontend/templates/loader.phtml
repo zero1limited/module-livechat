@@ -2,6 +2,7 @@
 (function () {
     function initLc() {
         window.__lc = window.__lc || {};
+        window.__lc.chat_between_groups = false;
         window.__lc.license = <?= $block->getLicenseCode() ?>;
 
         const script = document.createElement('script')
