@@ -17,7 +17,7 @@
                 <field id="license_code" translate="label" type=
                     "text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>LiveChat license code</label>
-                    <comment>Use this link for a 30 day LiveChat Trial https://goo.gl/LxRLFF</comment>
+                    <comment>Use this link for a 30 day LiveChat Trial https://bit.ly/hyva-livechat</comment>
                 </field>
             </group>
         </section>
