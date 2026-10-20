@@ -1,23 +1,85 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
     <system>
-        <section id="zero1_livechat" translate="label" type="text" sortOrder="550" showInDefault="1" showInWebsite="1" showInStore="0">
+        <section id="zero1_livechat" translate="label" type="text" sortOrder="550" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>ZERO-1 | LiveChat</label>
             <tab>customer</tab>
             <resource>Zero1_Livechat::config</resource>
-            <group id="description" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+            <group id="description" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                 <frontend_model>Zero1\Livechat\Block\Adminhtml\Config\Description</frontend_model>
             </group>
-            <group id="configuration" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
-                <label>Configuration</label>
-                <field id="enable" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+
+            <!-- Group/field ids enable + license_code are unchanged from 1.x: existing saved config keeps working -->
+            <group id="configuration" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Widget Embed</label>
+                <field id="enable" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enable LiveChat integration</label>
                     <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                    <comment>Remove any LiveChat tag added via GTM or the theme first, otherwise the widget loads twice.</comment>
                 </field>
-                <field id="license_code" translate="label" type=
-                    "text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="license_code" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>LiveChat license code</label>
-                    <comment>Use this link for a 30 day LiveChat Trial https://bit.ly/hyva-livechat</comment>
+                    <comment>Numeric license (window.__lc.license). Leave empty if your snippet uses an Organization ID instead.</comment>
+                    <validation>validate-digits</validation>
+                </field>
+                <field id="organization_id" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Organization ID</label>
+                    <comment>window.__lc.organizationId, used by newer LiveChat snippets. Copy from LiveChat &gt; Settings &gt; Channels &gt; Website.</comment>
+                </field>
+                <field id="integration_name" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Integration Name</label>
+                    <comment>Optional. window.__lc.integration_name from your snippet.</comment>
+                </field>
+                <field id="product_name" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Product Name</label>
+                    <comment>Optional. window.__lc.product_name from your snippet.</comment>
+                </field>
+                <field id="group" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Group ID</label>
+                    <comment>Optional. Routes chats to a LiveChat group (window.__lc.group), e.g. per store view.</comment>
+                    <validation>validate-digits</validation>
+                </field>
+                <field id="chat_between_groups" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Share Chat Sessions Between Groups</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>No = separate chat sessions per group (1.x behaviour).</comment>
+                </field>
+                <field id="load_strategy" translate="label" type="select" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Load Strategy</label>
+                    <source_model>Zero1\Livechat\Model\Config\Source\LoadStrategy</source_model>
+                    <comment>"First interaction" (1.x behaviour) keeps tracking.js off the critical path. Proactive greetings cannot fire until it has loaded.</comment>
+                </field>
+                <field id="pass_product_context" translate="label" type="select" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Send Product SKU/Name to Agents</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Adds product_sku / product_name session variables on product pages.</comment>
+                </field>
+            </group>
+
+            <group id="product_tabs" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Product Tab Chat Drafts</label>
+                <comment>Pre-fills the chat input when a customer selects a product info tab. Works with the widget whether it is embedded by this module or elsewhere (e.g. GTM).</comment>
+                <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="auto_open" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Open Chat on Tab Click</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>No (recommended): the draft is applied when the customer next opens chat, or immediately if chat is already open.</comment>
+                    <depends><field id="enabled">1</field></depends>
+                </field>
+                <field id="set_session_variables" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Send Last Tab Viewed to Agents</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends><field id="enabled">1</field></depends>
+                </field>
+                <field id="drafts" translate="label" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Tab Messages</label>
+                    <frontend_model>Zero1\Livechat\Block\Adminhtml\Form\Field\TabDrafts</frontend_model>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                    <comment><![CDATA[Tab key = Hyvä <code>activeTab</code> value (e.g. delivery) or Luma tab id (e.g. additional). Placeholders: {product}, {sku}, {tab}. Tabs not listed are ignored.]]></comment>
+                    <depends><field id="enabled">1</field></depends>
                 </field>
             </group>
         </section>

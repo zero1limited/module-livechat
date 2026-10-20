@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <zero1_livechat>
+            <configuration>
+                <enable>0</enable>
+                <load_strategy>interaction</load_strategy>
+                <chat_between_groups>0</chat_between_groups>
+                <pass_product_context>0</pass_product_context>
+            </configuration>
+            <product_tabs>
+                <enabled>0</enabled>
+                <auto_open>0</auto_open>
+                <set_session_variables>1</set_session_variables>
+                <drafts>{"_1":{"tab_key":"delivery","message":"Hi, I have a question about delivery for {product}"},"_2":{"tab_key":"returns","message":"Hi, I have a question about returns for {product}"},"_3":{"tab_key":"questions","message":"Hi, I have a question about {product} ({sku})"}}</drafts>
+            </product_tabs>
+        </zero1_livechat>
+    </default>
+</config>

@@ -1,8 +1,15 @@
 {
     "name": "zero1/module-livechat",
-    "description": "Easy integration of LiveChat",
+    "description": "LiveChat integration for Magento 2 / Hyvä: deferred widget embed plus product-tab chat drafts",
     "require": {
-        "magento/framework": "*"
+        "php": ">=7.4",
+        "magento/framework": "*",
+        "magento/module-catalog": "*",
+        "magento/module-config": "*",
+        "magento/module-store": "*"
+    },
+    "suggest": {
+        "magento/module-csp": "LiveChat domains are whitelisted via etc/csp_whitelist.xml"
     },
     "type": "magento2-module",
     "license": [
@@ -10,6 +17,8 @@
     ],
     "keywords": [
         "Magento Open Source",
+        "Adobe Commerce",
+        "Hyva",
         "LiveChat",
         "ZERO-1"
     ],

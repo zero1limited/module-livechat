@@ -1,20 +1,46 @@
-<script>
-(function () {
-    function initLc() {
-        window.__lc = window.__lc || {};
-        window.__lc.chat_between_groups = false;
-        window.__lc.license = <?= $block->getLicenseCode() ?>;
+<?php
+/**
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer
+ * @var \Zero1\Livechat\ViewModel\Livechat $viewModel
+ */
+$viewModel = $block->getData('view_model');
+if (!$viewModel->isEmbedEnabled()) {
+    return;
+}
+$config = $viewModel->getEmbedJson();
 
-        const script = document.createElement('script')
-        script.src = '<?= $block->getLivechatJsUrl() ?>';
-        script.id = 'livechat-snippet';
+$script = <<<JS
+(function (w, d) {
+    // Already embedded elsewhere (GTM / theme) - don't load twice.
+    if (w.__lc && (w.__lc.license || w.__lc.organizationId)) { return; }
 
-        document.head.append(script);
+    var cfg = {$config};
+    w.__lc = w.__lc || {};
+    Object.keys(cfg.lc).forEach(function (k) { w.__lc[k] = cfg.lc[k]; });
+    w.__lc.asyncInit = true; // we control when tracking.js loads
+
+    // Official LiveChat loader stub (queues on/once/off/call until tracking.js is ready)
+    ;(function(n,t,c){function i(n){return e._h?e._h.apply(null,n):e._q.push(n)}var e={_q:[],_h:null,_v:"2.0",on:function(){i(["on",c.call(arguments)])},once:function(){i(["once",c.call(arguments)])},off:function(){i(["off",c.call(arguments)])},get:function(){if(!e._h)throw new Error("[LiveChatWidget] You can't use getters before load.");return i(["get",c.call(arguments)])},call:function(){i(["call",c.call(arguments)])},init:function(){var n=t.createElement("script");n.async=!0,n.type="text/javascript",n.src="https://cdn.livechatinc.com/tracking.js",t.head.appendChild(n)}};!n.__lc.asyncInit&&e.init(),n.LiveChatWidget=n.LiveChatWidget||e}(w,d,[].slice));
+
+    var started = false;
+    function start() {
+        if (started) { return; }
+        started = true;
+        w.LiveChatWidget.init();
     }
 
-    // trigger load on mobile by any interaction
-    document.body.addEventListener('touchstart', initLc, {once: true});
-    // trigger load on desktop on any mouse movement
-    document.body.addEventListener('mouseover', initLc, {once: true});
-})();
-</script>
+    if (!cfg.onInteraction) { start(); return; }
+
+    var events = ['pointerdown', 'keydown', 'touchstart', 'scroll', 'mousemove'];
+    function onFirst() {
+        events.forEach(function (e) { w.removeEventListener(e, onFirst, {passive: true}); });
+        start();
+    }
+    events.forEach(function (e) { w.addEventListener(e, onFirst, {passive: true, once: true}); });
+    // Let other code (e.g. product tab drafts) force a load
+    w.zero1LiveChatLoad = start;
+})(window, document);
+JS;
+?>
+<?= /* @noEscape */ $secureRenderer->renderTag('script', [], $script, false) ?>

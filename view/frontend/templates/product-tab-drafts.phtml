@@ -1,0 +1,92 @@
+<?php
+/**
+ * Pre-fills the LiveChat input when a product info tab is selected.
+ * Hyvä: elements with @click / x-on:click containing  activeTab = '<key>'
+ * Luma: .product.data.items [data-role="collapsible"] titles (id="tab-label-<key>")
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer
+ * @var \Zero1\Livechat\ViewModel\Livechat $viewModel
+ */
+$viewModel = $block->getData('view_model');
+if (!$viewModel->isTabDraftsEnabled()) {
+    return;
+}
+$config = $viewModel->getTabDraftsJson();
+
+$script = <<<JS
+(function (w, d) {
+    var cfg = {$config};
+    var pendingDraft = null;
+    var lastKey = null;
+    var bound = false;
+
+    function lc() { return w.LiveChatWidget; }
+    function loaded() { return !!w.__lc_inited; }
+
+    function tabKeyFor(el) {
+        // Hyvä / Alpine
+        var hyva = el.closest('[\\\\@click*="activeTab"], [x-on\\\\:click*="activeTab"]');
+        if (hyva) {
+            var expr = hyva.getAttribute('@click') || hyva.getAttribute('x-on:click') || '';
+            var m = expr.match(/activeTab\s*=\s*['"]([^'"]+)['"]/);
+            return m ? { key: m[1].toLowerCase(), label: hyva.textContent.trim() } : null;
+        }
+        // Luma
+        var luma = el.closest('.product.data.items [data-role="collapsible"], .product.data.items [data-role="title"]');
+        if (luma && luma.id) {
+            return { key: luma.id.replace(/^tab-label-/, '').replace(/-title$/, '').toLowerCase(), label: luma.textContent.trim() };
+        }
+        return null;
+    }
+
+    function applyDraft(text) {
+        lc().call('maximize', { messageDraft: text });
+        pendingDraft = null;
+    }
+
+    function bindVisibility() {
+        if (bound || !lc()) { return; }
+        bound = true;
+        lc().on('visibility_changed', function (data) {
+            if (data && data.visibility === 'maximized' && pendingDraft) {
+                applyDraft(pendingDraft);
+            }
+        });
+    }
+
+    d.addEventListener('click', function (e) {
+        if (!lc()) { return; } // widget not on this page
+        var tab = tabKeyFor(e.target);
+        if (!tab || !cfg.drafts[tab.key] || tab.key === lastKey) { return; }
+        lastKey = tab.key; // also ignores the mobile accordion close-click
+
+        var text = cfg.drafts[tab.key].split('{tab}').join(tab.label);
+        bindVisibility();
+
+        if (cfg.sessionVars) {
+            lc().call('update_session_variables', { last_tab_viewed: tab.key });
+        }
+
+        if (cfg.autoOpen) {
+            if (w.zero1LiveChatLoad) { w.zero1LiveChatLoad(); }
+            applyDraft(text); // queued by the stub if tracking.js is still loading
+            return;
+        }
+
+        var maximized = false;
+        if (loaded()) {
+            try { maximized = (lc().get('state') || {}).visibility === 'maximized'; } catch (err) {}
+        }
+        if (maximized) {
+            applyDraft(text);
+        } else {
+            pendingDraft = text;
+        }
+    }, true);
+
+    bindVisibility();
+})(window, document);
+JS;
+?>
+<?= /* @noEscape */ $secureRenderer->renderTag('script', [], $script, false) ?>
