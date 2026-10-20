@@ -8,11 +8,15 @@ use Magento\Catalog\Model\Product;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 use Zero1\Livechat\Model\Config;
 use Zero1\Livechat\Model\Config\Source\LoadStrategy;
+use Zero1\Livechat\Model\WidgetCodeParser;
 
 class Livechat implements ArgumentInterface
 {
     private const JSON_FLAGS = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
         | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
+
+    /** Standard LiveChat loader stub - only used for the legacy license-number fallback. */
+    private const LEGACY_LOADER = ';(function(n,t,c){function i(n){return e._h?e._h.apply(null,n):e._q.push(n)}var e={_q:[],_h:null,_v:"2.0",on:function(){i(["on",c.call(arguments)])},once:function(){i(["once",c.call(arguments)])},off:function(){i(["off",c.call(arguments)])},get:function(){if(!e._h)throw new Error("[LiveChatWidget] You can\'t use getters before load.");return i(["get",c.call(arguments)])},call:function(){i(["call",c.call(arguments)])},init:function(){var n=t.createElement("script");n.async=!0,n.type="text/javascript",n.src="https://cdn.livechatinc.com/tracking.js",t.head.appendChild(n)}};!n.__lc.asyncInit&&e.init(),n.LiveChatWidget=n.LiveChatWidget||e}(window,document,[].slice))';
 
     /** @var Config */
     private $config;
@@ -20,10 +24,14 @@ class Livechat implements ArgumentInterface
     /** @var CatalogHelper */
     private $catalogHelper;
 
-    public function __construct(Config $config, CatalogHelper $catalogHelper)
+    /** @var WidgetCodeParser */
+    private $parser;
+
+    public function __construct(Config $config, CatalogHelper $catalogHelper, WidgetCodeParser $parser)
     {
         $this->config = $config;
         $this->catalogHelper = $catalogHelper;
+        $this->parser = $parser;
     }
 
     public function isEmbedEnabled(): bool
@@ -36,21 +44,13 @@ class Livechat implements ArgumentInterface
         return $this->config->isTabDraftsEnabled() && $this->getProduct() !== null;
     }
 
+    /**
+     * Settings applied to window.__lc before the vendor snippet runs. The snippet
+     * starts with `window.__lc = window.__lc || {}`, so these are preserved.
+     */
     public function getEmbedJson(): string
     {
         $lc = ['chat_between_groups' => $this->config->isChatBetweenGroups()];
-        if ($this->config->getLicense() !== '') {
-            $lc['license'] = (int) $this->config->getLicense();
-        }
-        if ($this->config->getOrganizationId() !== '') {
-            $lc['organizationId'] = $this->config->getOrganizationId();
-        }
-        if ($this->config->getIntegrationName() !== '') {
-            $lc['integration_name'] = $this->config->getIntegrationName();
-        }
-        if ($this->config->getProductName() !== '') {
-            $lc['product_name'] = $this->config->getProductName();
-        }
         if ($this->config->getGroup() !== '') {
             $lc['group'] = (int) $this->config->getGroup();
         }
@@ -67,6 +67,35 @@ class Livechat implements ArgumentInterface
             'lc' => $lc,
             'onInteraction' => $this->config->getLoadStrategy() === LoadStrategy::INTERACTION,
         ], self::JSON_FLAGS);
+    }
+
+    /**
+     * The pasted widget code split into scripts + noscript. Falls back to the
+     * standard snippet built from the legacy 1.x license number.
+     *
+     * @return array{scripts: array<int, array{attributes: array<string,string>, content: string}>, noscript: string}
+     */
+    public function getWidgetParts(): array
+    {
+        $code = $this->config->getWidgetCode();
+        if ($code !== '') {
+            return $this->parser->parse($code);
+        }
+
+        $license = $this->config->getLicense();
+        if ($license === '') {
+            return ['scripts' => [], 'noscript' => ''];
+        }
+
+        return [
+            'scripts' => [[
+                'attributes' => [],
+                'content' => 'window.__lc = window.__lc || {};' . "\n"
+                    . 'window.__lc.license = ' . (int) $license . ';' . "\n"
+                    . self::LEGACY_LOADER,
+            ]],
+            'noscript' => '',
+        ];
     }
 
     public function getTabDraftsJson(): string

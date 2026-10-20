@@ -41,27 +41,23 @@ class Config
     public function isEmbedEnabled(): bool
     {
         return $this->flag('configuration/enable')
-            && ($this->getLicense() !== '' || $this->getOrganizationId() !== '');
+            && ($this->getWidgetCode() !== '' || $this->getLicense() !== '');
     }
 
+    /**
+     * Raw "Web Widget HTML Code" pasted from LiveChat / Text (preferred).
+     */
+    public function getWidgetCode(): string
+    {
+        return $this->value('configuration/widget_code');
+    }
+
+    /**
+     * Legacy 1.x license number - only used when no widget code is set.
+     */
     public function getLicense(): string
     {
         return $this->value('configuration/license_code');
-    }
-
-    public function getOrganizationId(): string
-    {
-        return $this->value('configuration/organization_id');
-    }
-
-    public function getIntegrationName(): string
-    {
-        return $this->value('configuration/integration_name');
-    }
-
-    public function getProductName(): string
-    {
-        return $this->value('configuration/product_name');
     }
 
     public function getGroup(): string

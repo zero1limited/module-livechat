@@ -1,5 +1,12 @@
 <?php
 /**
+ * Outputs the "Web Widget HTML Code" pasted in admin, wrapped so that:
+ *  - group / chat_between_groups / product params are set on window.__lc first
+ *  - "first interaction" loading works by setting __lc.asyncInit (honoured by the
+ *    official snippet) and calling LiveChatWidget.init() later
+ *  - nothing loads twice if LiveChat is already on the page (GTM / theme)
+ *  - every inline script goes through SecureHtmlRenderer for CSP
+ *
  * @var \Magento\Framework\View\Element\Template $block
  * @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer
  * @var \Zero1\Livechat\ViewModel\Livechat $viewModel
@@ -8,29 +15,44 @@ $viewModel = $block->getData('view_model');
 if (!$viewModel->isEmbedEnabled()) {
     return;
 }
+$parts = $viewModel->getWidgetParts();
+if ($parts['scripts'] === []) {
+    return;
+}
 $config = $viewModel->getEmbedJson();
 
-$script = <<<JS
-(function (w, d) {
-    // Already embedded elsewhere (GTM / theme) - don't load twice.
-    if (w.__lc && (w.__lc.license || w.__lc.organizationId)) { return; }
-
+$prelude = <<<JS
+(function (w) {
     var cfg = {$config};
+    var existing = !!w.LiveChatWidget;
+    w.__zero1Lc = { cfg: cfg, existing: existing };
     w.__lc = w.__lc || {};
     Object.keys(cfg.lc).forEach(function (k) { w.__lc[k] = cfg.lc[k]; });
-    w.__lc.asyncInit = true; // we control when tracking.js loads
+    // asyncInit stops the vendor snippet calling init() itself
+    if (existing || cfg.onInteraction) { w.__lc.asyncInit = true; }
+})(window);
+JS;
 
-    // Official LiveChat loader stub (queues on/once/off/call until tracking.js is ready)
-    ;(function(n,t,c){function i(n){return e._h?e._h.apply(null,n):e._q.push(n)}var e={_q:[],_h:null,_v:"2.0",on:function(){i(["on",c.call(arguments)])},once:function(){i(["once",c.call(arguments)])},off:function(){i(["off",c.call(arguments)])},get:function(){if(!e._h)throw new Error("[LiveChatWidget] You can't use getters before load.");return i(["get",c.call(arguments)])},call:function(){i(["call",c.call(arguments)])},init:function(){var n=t.createElement("script");n.async=!0,n.type="text/javascript",n.src="https://cdn.livechatinc.com/tracking.js",t.head.appendChild(n)}};!n.__lc.asyncInit&&e.init(),n.LiveChatWidget=n.LiveChatWidget||e}(w,d,[].slice));
+$postlude = <<<JS
+(function (w, d) {
+    var s = w.__zero1Lc;
+    if (!s || s.existing || !w.LiveChatWidget) { return; }
+
+    function trackingLoaded() {
+        return !!w.__lc_inited || !!d.querySelector('script[src*="livechatinc.com/tracking.js"]');
+    }
 
     var started = false;
     function start() {
         if (started) { return; }
         started = true;
-        w.LiveChatWidget.init();
+        if (!trackingLoaded() && typeof w.LiveChatWidget.init === 'function') {
+            w.LiveChatWidget.init();
+        }
     }
+    w.zero1LiveChatLoad = start;
 
-    if (!cfg.onInteraction) { start(); return; }
+    if (!s.cfg.onInteraction) { return; } // vendor snippet has already initialised
 
     var events = ['pointerdown', 'keydown', 'touchstart', 'scroll', 'mousemove'];
     function onFirst() {
@@ -38,9 +60,19 @@ $script = <<<JS
         start();
     }
     events.forEach(function (e) { w.addEventListener(e, onFirst, {passive: true, once: true}); });
-    // Let other code (e.g. product tab drafts) force a load
-    w.zero1LiveChatLoad = start;
 })(window, document);
 JS;
 ?>
-<?= /* @noEscape */ $secureRenderer->renderTag('script', [], $script, false) ?>
+<?= /* @noEscape */ $secureRenderer->renderTag('script', [], $prelude, false) ?>
+<?php foreach ($parts['scripts'] as $script): ?>
+<?= /* @noEscape */ $secureRenderer->renderTag(
+    'script',
+    $script['attributes'],
+    $script['content'],
+    false
+) ?>
+<?php endforeach; ?>
+<?= /* @noEscape */ $secureRenderer->renderTag('script', [], $postlude, false) ?>
+<?php if ($parts['noscript'] !== ''): ?>
+<?= /* @noEscape */ $parts['noscript'] ?>
+<?php endif; ?>

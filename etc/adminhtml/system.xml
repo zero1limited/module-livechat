@@ -17,22 +17,15 @@
                     <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
                     <comment>Remove any LiveChat tag added via GTM or the theme first, otherwise the widget loads twice.</comment>
                 </field>
-                <field id="license_code" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>LiveChat license code</label>
-                    <comment>Numeric license (window.__lc.license). Leave empty if your snippet uses an Organization ID instead.</comment>
+                <field id="widget_code" translate="label" type="textarea" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Web Widget HTML Code</label>
+                    <backend_model>Zero1\Livechat\Model\Config\Backend\WidgetCode</backend_model>
+                    <comment><![CDATA[Paste the full code from LiveChat / Text: <em>Settings &gt; Channels &gt; Website &gt; Install manually</em> (everything from <code>&lt;!-- Start of ... code --&gt;</code> to <code>&lt;!-- End of ... code --&gt;</code>). Re-paste it here whenever LiveChat updates their snippet.]]></comment>
+                </field>
+                <field id="license_code" translate="label" type="text" sortOrder="25" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Legacy License Number</label>
+                    <comment>From version 1.x. Only used when Web Widget HTML Code is empty. Clear this once the widget code is in place.</comment>
                     <validation>validate-digits</validation>
-                </field>
-                <field id="organization_id" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Organization ID</label>
-                    <comment>window.__lc.organizationId, used by newer LiveChat snippets. Copy from LiveChat &gt; Settings &gt; Channels &gt; Website.</comment>
-                </field>
-                <field id="integration_name" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Integration Name</label>
-                    <comment>Optional. window.__lc.integration_name from your snippet.</comment>
-                </field>
-                <field id="product_name" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Product Name</label>
-                    <comment>Optional. window.__lc.product_name from your snippet.</comment>
                 </field>
                 <field id="group" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Group ID</label>

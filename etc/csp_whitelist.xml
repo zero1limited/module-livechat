@@ -12,11 +12,13 @@
             <values>
                 <value id="zero1_livechat_all" type="host">*.livechatinc.com</value>
                 <value id="zero1_livechat_wss" type="host">wss://*.livechatinc.com</value>
+                <value id="zero1_livechat_text" type="host">*.text.com</value>
             </values>
         </policy>
         <policy id="frame-src">
             <values>
                 <value id="zero1_livechat_frame" type="host">*.livechatinc.com</value>
+                <value id="zero1_livechat_text_frame" type="host">*.text.com</value>
             </values>
         </policy>
         <policy id="img-src">
