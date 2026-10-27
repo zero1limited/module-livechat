@@ -25,12 +25,12 @@
                 <field id="license_code" translate="label" type="text" sortOrder="25" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Legacy License Number</label>
                     <comment>From version 1.x. Only used when Web Widget HTML Code is empty. Clear this once the widget code is in place.</comment>
-                    <validation>validate-digits</validation>
+                    <validate>validate-digits</validate>
                 </field>
                 <field id="group" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Group ID</label>
                     <comment>Optional. Routes chats to a LiveChat group (window.__lc.group), e.g. per store view.</comment>
-                    <validation>validate-digits</validation>
+                    <validate>validate-digits</validate>
                 </field>
                 <field id="chat_between_groups" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Share Chat Sessions Between Groups</label>
