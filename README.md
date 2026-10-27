@@ -1,4 +1,4 @@
-# ZERO-1 LiveChat for Magento 2 & Hyvä
+# Live Chat for Magento
 
 Integrates [LiveChat](https://www.livechat.com/) with Magento 2.4 (Hyvä and Luma).
 
